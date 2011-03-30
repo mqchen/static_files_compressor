@@ -17,4 +17,8 @@ class extension_staticfilescompressor extends Extension {
 		
 	}
 	
+	protected function addRewriteRules($htaccess) {
+		
+	}
+	
 }
