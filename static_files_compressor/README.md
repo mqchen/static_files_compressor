@@ -2,7 +2,7 @@
 ## About
 
 This is a small library for merging, minifying and compressing static files in hope of increasing
-a web page's preformance.
+a web pages preformance.
 
 **Merging multiple files**  
 By merging multiple files into one request the client only has to make one HTTP request, which
@@ -26,31 +26,38 @@ It also caches the request's response in a file on the server to save processing
   
 **Instead of referencing all your css/js files seperately like this:**
 
-- /workspace/css/reset.css
-- /workspace/css/library.css
-- /workspace/css/master.css
-- /workspace/css/page-frontpage.css
-- /workspace/css/page-schools.css
-- /workspace/css/page-subjects.css
-- /workspace/css/page-info.css
+- /workspace/styles/reset.css
+- /workspace/styles/library.css
+- /workspace/styles/master.css
+- /workspace/styles/page-frontpage.css
+- /workspace/styles/page-schools.css
+- /workspace/styles/page-subjects.css
+- /workspace/styles/page-info.css
 
 Everything can be combined into one request:
 
-- /workspace/css/SFC.css?path=css&compress&files=reset.css,library.css,master.css,etc..
+- /workspace/styles/SFC.css?path=styles&compress&files=reset.css,library.css,master.css,etc..
   
 **Breaking it down:**
 
 - /workspace/css/       Necessary so that all paths in the css files are still relative.
 - SFC                   The keyword for initializing this extension.
 - .css                  Specifies the mode, can be either css, js or txt.
-- ?path=css             A path relative to the workspace. All files must be within this path.
+- ?path=style           A path relative to the workspace. All files must be within this path.
 - &compress             A compression/minify enginge will be used (only for css and js).
-- &files=f1,f2          A comma seperated list of files within the 'path'
+- &files=f1,f2          A comma seperated list of files within the "path"
   
 **Other params:**
 
+- cache=normal          Can be either normal, refresh or flush.
 - cachetimeout=10       If some files are remote files, cache cannot be more than 10 sec old.
 - outputcompress=0      Disable output compression, gzip.
+- debug                 Adding this param shows debug mode with FirePHP.
+
+
+**XSLT utility**  
+This package also includes a small XSLT utility in `utilities/`. It is moved to `workspace/utilities`
+when the extension is installed. Please see the file«s documentation on how it works.
 
 
 ## License
