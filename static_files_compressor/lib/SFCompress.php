@@ -484,7 +484,7 @@ class SFCompress {
 		
 		// Condition 2
 		if($this->remoteFiles > 0) {
-			$scheduledTimeout = $$this->getCacheScheduledExpire();
+			$scheduledTimeout = $this->getCacheScheduledExpire();
 			if(time() > $scheduledTimeout) {
 				$this->debug('Cache file has expired - need to refresh remote files.');
 				$this->debug('Cache file last updated: ' . self::formatDate($filemtime) .
