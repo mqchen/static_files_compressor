@@ -362,7 +362,7 @@ class SFCompress {
 		$this->addHeader('Last-modified', date('r', $filemtime), false);
 			
 		/// Add expires
-		$this->addHeader('Expires', date('r', $filemtime + $this->cacheTimeout), false);
+		$this->addHeader('Expires', date('r', $this->getCacheScheduledExpire()), false);
 			
 		/// Add etype
 		$this->addHeader('ETag', '"' . $this->contentsHash . '"', false);
