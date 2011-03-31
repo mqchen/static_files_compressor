@@ -40,19 +40,19 @@ Everything can be combined into one request:
   
 **Breaking it down:**
 
-- `/workspace/css/       Necessary so that all paths in the css files are still relative.`
-- `SFC                   The keyword for initializing this extension.`
-- `.css                  Specifies the mode, can be either css, js or txt.`
-- `?path=style           A path relative to the workspace. All files must be within this path.`
-- `&compress             A compression/minify enginge will be used (only for css and js).`
-- `&files=f1,f2          A comma seperated list of files within the "path"`
+- `/workspace/css/`       Necessary so that all paths in the css files are still relative.
+- `SFC`                   The keyword for initializing this extension.
+- `.css`                  Specifies the mode, can be either css, js or txt.
+- `?path=style`           A path relative to the workspace. All files must be within this path.
+- `&compress`             A compression/minify enginge will be used (only for css and js).
+- `&files=f1,f2`          A comma seperated list of files within the "path"
   
 **Other params:**
 
-- `cache=normal          Can be either normal, refresh or flush.`
-- `cachetimeout=10       If some files are remote files, cache cannot be more than 10 sec old.`
-- `outputcompress=0      Disable output compression, gzip.`
-- `debug                 Adding this param shows debug mode with FirePHP.`
+- `cache=normal`          Can be either normal, refresh or flush.
+- `cachetimeout=10`       If some files are remote files, cache cannot be more than 10 sec old.
+- `outputcompress=0`      Disable output compression, gzip.
+- `debug`                 Adding this param shows debug mode with FirePHP.
 
 
 **XSLT utility**  
