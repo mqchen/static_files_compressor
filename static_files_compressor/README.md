@@ -40,7 +40,7 @@ Everything can be combined into one request:
   
 **Breaking it down:**
 
-- `/workspace/css/`       Necessary so that all paths in the css files are still relative.
+- `/workspace/styles/`    Necessary so that all paths in the css files are still relative.
 - `SFC`                   The keyword for initializing this extension.
 - `.css`                  Specifies the mode, can be either css, js or txt.
 - `?path=style`           A path relative to the workspace. All files must be within this path.
