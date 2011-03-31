@@ -60,6 +60,12 @@ This package also includes a small XSLT utility in `utilities/`. It is moved to 
 when the extension is installed. Please see the file's documentation on how it works.
 
 
+**Debug**  
+Debug info is generated if `?debug` param is added. The info is sent via FirePHP so you need to
+install the [FirePHP extension for Firebug][1]. You must also make the SFC request directly to view
+the debug info.
+
+
 ## License
 
 3rd party code each has their own license.
@@ -82,3 +88,6 @@ PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS 
 FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
+
+
+  [1]: http://www.firephp.org/
