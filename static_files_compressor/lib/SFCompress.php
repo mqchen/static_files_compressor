@@ -22,8 +22,10 @@ class SFCompress {
 	
 	/// Internal props
 	protected $hash = null;
+	protected $contentsHash = '';
 	protected $localFiles = 0;
 	protected $remoteFiles = 0;
+	protected $responseStatus = 200;
 	protected $headers = array();
 	protected $cachePath = '/tmp'; // Reset later to CACHE.
 	protected $cachePrefix = 'sfc-';
@@ -97,8 +99,19 @@ class SFCompress {
 			}
 		}
 		else {
+			// Cache is still healthy and fine
 			$contents = $this->getCacheContents();
 			$this->debug('Loaded ' . self::formatBytes(strlen($contents)) . ' bytes from cache.');
+		}
+		
+		// ETag and If-Modified-Since
+		if($this->isClientsCacheValid($contents)) {
+			$this->debug('Client\'s cache copy is still valid. Not modified.');
+			// Add a not modified header
+			$this->setResponseStatus(304);
+		}
+		else {
+			$this->debug('Client\'s cache copy is invalid.');
 		}
 		
 		// gzip compress output
@@ -120,6 +133,32 @@ class SFCompress {
 		// Free memory
 		unset($contents);
 		unset($output);
+	}
+	
+	protected function isClientsCacheValid($contents) {
+		// If modified since
+		if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+			$date = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+			if(!$date) {
+				return false; // Date parsing failed
+			}
+			// If server«s cache has been modified after this date, client must refresh
+			if($this->getCacheLastModified() > $date) {
+				return false; // Server«s cache is newer
+			}
+			// If cache is scheduled to expire soon (due to remote files), expire it
+			if($this->remoteFiles > 0 && $this->getCacheScheduledExpire() <= $date) {
+				return false; // There were remote files requested, and servers cache was scheduled to expire before this request.
+			}
+			// Cache has not been modified since
+			return true;
+		}
+		
+		// Etag
+		$this->contentsHash = md5($contents);
+		$clientEtag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : false;
+		$clientEtag = str_replace(array('"',"'"), '', $clientEtag);
+		return $clientEtag === $this->contentsHash;
 	}
 	
 	protected static function formatBytes($bytes, $pad = false) {
@@ -157,14 +196,6 @@ class SFCompress {
 				'From ' . self::formatBytes($originalSize) . ' bytes to ' . self::formatBytes($newSize) . ' bytes.';
 	}
 	
-	public function addHeader($header, $data, $overwrite = true) {
-		$header = ucwords($header);
-		if(!$overwrite && array_key_exists($header, $this->headers)) {
-			return;
-		}
-		$this->headers[$header] = $data;
-	}
-	
 	protected function beginTimer($id) {
 		$this->timers[$id] = microtime(true);
 	}
@@ -183,9 +214,15 @@ class SFCompress {
 			$method = $tmp[1]['function'];
 			
 			try {
-				// Always hide as much as possible of the path
-				$str = str_replace(DOCROOT, 'DOCROOT', $str);
-				$this->firephp->info(str_pad($method, 20, chr(160), STR_PAD_RIGHT). ': ' . $str);
+				if(is_array($str) || is_object($str)) {
+					$this->firephp->info(str_pad($method, 20, chr(160), STR_PAD_RIGHT). ': &darr;');
+					$this->firephp->info($str);
+				}
+				else {
+					// Always hide as much as possible of the path
+					$str = str_replace(DOCROOT, 'DOCROOT', $str);
+					$this->firephp->info(str_pad($method, 20, chr(160), STR_PAD_RIGHT). ': ' . $str);
+				}
 			}
 			catch(Exception $e) {
 				echo "<pre>";
@@ -294,6 +331,18 @@ class SFCompress {
 		}
 	}
 	
+	public function setResponseStatus($code) {
+		$this->responseStatus = $code;
+	}
+	
+	public function addHeader($header, $data, $overwrite = true) {
+		//$header = ucwords($header);
+		if(!$overwrite && array_key_exists($header, $this->headers)) {
+			return;
+		}
+		$this->headers[$header] = $data;
+	}
+	
 	protected function makeHeaders() {
 		
 		/// Content type
@@ -308,14 +357,26 @@ class SFCompress {
 		
 		/// Last modified
 		//var_dump(($this->getCacheFilePath()));
-		$filemtime = @filemtime($this->getCacheFilePath());
-		if($filemtime !== false) {
-			$this->addHeader('Last-modified', date('r', $filemtime), false);
-		}
+		$filemtime = $this->getCacheLastModified();
+		
+		$this->addHeader('Last-modified', date('r', $filemtime), false);
+			
+		/// Add expires
+		$this->addHeader('Expires', date('r', $filemtime + $this->cacheTimeout), false);
+			
+		/// Add etype
+		$this->addHeader('ETag', '"' . $this->contentsHash . '"', false);
 	}
 	
 	public function sendHeaders() {
 		if(headers_sent()) { return; }
+		
+		/// Response status
+		$desc = array(
+			200 => 'OK',
+			304 => 'Not Modified'
+		);
+		header('HTTP/1.1 ' . $this->responseStatus . ' ' . $desc[$this->responseStatus]);
 		
 		$this->makeHeaders();
 		
@@ -378,6 +439,18 @@ class SFCompress {
 		}
 	}
 	
+	public function getCacheScheduledExpire() {
+		return $this->getCacheLastModified() + $this->cacheTimeout;
+	}
+	
+	public function getCacheLastModified() {
+		$filemtime = @filemtime($this->getCacheFilePath());
+		if(!$filemtime) {
+			$filemtime = time(); // Could not get, assume cache was just created
+		}
+		return $filemtime;
+	}
+	
 	public function getCacheContents() {
 		return file_get_contents($this->getCacheFilePath());
 	}
@@ -407,11 +480,11 @@ class SFCompress {
 			return false;
 		}
 		
-		$filemtime = filemtime($path);
+		$filemtime = $this->getCacheLastModified();
 		
 		// Condition 2
 		if($this->remoteFiles > 0) {
-			$scheduledTimeout = $filemtime + $this->cacheTimeout;
+			$scheduledTimeout = $$this->getCacheScheduledExpire();
 			if(time() > $scheduledTimeout) {
 				$this->debug('Cache file has expired - need to refresh remote files.');
 				$this->debug('Cache file last updated: ' . self::formatDate($filemtime) .
