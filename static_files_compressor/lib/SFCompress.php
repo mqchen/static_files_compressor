@@ -302,32 +302,60 @@ class SFCompress {
 		$this->path = isset($params['path']) ? $params['path'] : $this->path;
 		$files = isset($params['files']) ? explode(',', $params['files']) : array();
 		for($i = 0, $l = count($files); $i < $l; $i++) {
-			if(strpos($files[$i], ':') === false) {
-				$file = WORKSPACE . '/' . $this->path . '/'. trim($files[$i]);
-				$tmpFile = realpath($file);
-				if($tmpFile !== false) {
-					// exists, validate that it is within workspace
-					if(strpos($tmpFile, WORKSPACE . '/') !== 0 // need to make sure there is no '../' in $path.
-					|| strpos($tmpFile, WORKSPACE . '/' . $this->path . '/') !== 0) {
-						// it is not inside specified path
-						$this->debug('Local file must be within: workspace/' . $this->path . '. Ignoring: ' . $file);
-						continue;
-					}
-					$file = $tmpFile;
-				}
-				$this->files[] = array('local', $file);
-				$this->localFiles++;
-			}
-			else {
-				$file = $files[$i];
-				$url = parse_url($file);
-				if(!in_array(strtolower($url['scheme']), array('http', 'https', 'ftp', 'sftp', 'ftps'))) {
-					$this->debug('Unsupported scheme: ' . $file);
+			$this->addFile(WORKSPACE . '/' . $this->path . '/'. trim($files[$i]));
+		}
+	}
+	
+	protected function addFile($file) {
+		
+		if(strpos($file, ':') === false) {
+			//$file = WORKSPACE . '/' . $this->path . '/'. trim($file);
+			$tmpFile = realpath($file);
+			if($tmpFile !== false) {
+				// exists, validate that it is within workspace
+				if(strpos($tmpFile, WORKSPACE . '/') !== 0 // need to make sure there is no '../' in $path.
+				|| strpos($tmpFile, WORKSPACE . '/' . $this->path . '/') !== 0) {
+					// it is not inside specified path
+					$this->debug('Local file must be within: workspace/' . $this->path . '. Ignoring: ' . $file);
 					continue;
 				}
-				$this->files[] = array('remote', $file);
-				$this->remoteFiles++;
+				$file = $tmpFile;
+				$this->appendFile('local', $file);
 			}
+			else { // File does not exist, try glob()
+				$fileGlob = glob($file);
+				$this->debug('Attempting glob: ' . $file);
+				if(is_array($fileGlob)) {
+					foreach($fileGlob as $file) {
+						//$this->appendFile('local', $file);
+						$this->addFile($file);
+					}
+				}
+				else { // Glob failed, add file to list so that it will be refreshed
+					$this->debug('Glob failed.');
+					$this->appendFile('local', $file);
+				}
+			}
+		}
+		else {
+			$file = $files[$i];
+			$url = parse_url($file);
+			if(!in_array(strtolower($url['scheme']), array('http', 'https', 'ftp', 'sftp', 'ftps'))) {
+				$this->debug('Unsupported scheme: ' . $file);
+				continue;
+			}
+			$this->appendFile('remote', $file);
+		}
+		
+	}
+	
+	protected function appendFile($location, $file) {
+		$this->files[] = array($location, $file);
+		if($location === 'local') {
+			$this->localFiles++;
+		}
+		else {
+			$this->remoteFiles++;
 		}
 	}
 	
@@ -387,7 +415,11 @@ class SFCompress {
 	
 	public function makeHash() {
 		if($this->hash === null) {
-			$this->hash = md5($this->mode . $this->compress . implode('+', $this->files));
+			$f = '';
+			foreach($this->files as $v) {
+				$f .= implode(',', $v);
+			}
+			$this->hash = md5($this->mode . $this->compress . $f);
 		}
 		return $this->hash;
 	}
@@ -582,6 +614,10 @@ class SFCompress {
 		/*if($this->mode === 'js') {
 			return '+function(){'.$str.'}();';
 		}*/
+		if($this->mode === 'css') {
+			// Remove @CHARSET
+			$str = preg_replace('/^@CHARSET ".+";/', '', $str);
+		}
 		return $str;
 	}
 	
