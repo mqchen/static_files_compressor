@@ -1,5 +1,9 @@
 <?php
 
+if(!function_exists('str_getcsv')) {
+	require_once dirname(__FILE__) . '/Functions/str_getcsv.php';
+}
+
 class SFCompress {
 	
 	/// Config
@@ -300,7 +304,9 @@ class SFCompress {
 	
 		// All file paths are assumed to be relative to workspace/, also supports http://cssfile.tld
 		$this->path = isset($params['path']) ? $params['path'] : $this->path;
-		$files = isset($params['files']) ? explode(',', $params['files']) : array();
+		//$files = isset($params['files']) ? explode(',', $params['files']) : array();
+		
+		$files = isset($params['files']) ? str_getcsv($params['files']) : array();
 		for($i = 0, $l = count($files); $i < $l; $i++) {
 			$this->addFile(WORKSPACE . '/' . $this->path . '/'. trim($files[$i]));
 		}
@@ -323,10 +329,11 @@ class SFCompress {
 				$this->appendFile('local', $file);
 			}
 			else { // File does not exist, try glob()
-				$fileGlob = glob($file);
+				$fileGlob = glob($file, GLOB_BRACE);
 				$this->debug('Attempting glob: ' . $file);
 				if(is_array($fileGlob)) {
 					$containsErrors = false;
+					$this->debug('Glob matches: ' . count($fileGlob));
 					foreach($fileGlob as $file) {
 						//$this->appendFile('local', $file);
 						if(!$this->addFile($file)) {

@@ -22,6 +22,12 @@ for that client and save server load.
 It also caches the request's response in a file on the server to save processing time.
 
 
+## How to install
+
+- Extract archive and move the directory `static_files_compressor` to your extensions directory.
+- Enable it in Symphony
+
+
 ## How to use
   
 **Instead of referencing all your css/js files seperately like this:**
