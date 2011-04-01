@@ -308,13 +308,19 @@ class SFCompress {
 		
 		$files = isset($params['files']) ? str_getcsv($params['files']) : array();
 		for($i = 0, $l = count($files); $i < $l; $i++) {
-			$this->addFile(WORKSPACE . '/' . $this->path . '/'. trim($files[$i]));
+			$file = trim($files[$i]);
+			if(strpos($file, ':') !== false) {
+				$this->addFile($file, true);
+			}
+			else {
+				$this->addFile(WORKSPACE . '/' . $this->path . '/'. $file);
+			}
 		}
 	}
 	
-	protected function addFile($file) {
+	protected function addFile($file, $remote = false) {
 		
-		if(strpos($file, ':') === false) {
+		if($remote === false) {
 			//$file = WORKSPACE . '/' . $this->path . '/'. trim($file);
 			$tmpFile = realpath($file);
 			if($tmpFile !== false) {
@@ -349,7 +355,6 @@ class SFCompress {
 			}
 		}
 		else {
-			$file = $files[$i];
 			$url = parse_url($file);
 			if(!in_array(strtolower($url['scheme']), array('http', 'https', 'ftp', 'sftp', 'ftps'))) {
 				$this->debug('Unsupported scheme: ' . $file);
