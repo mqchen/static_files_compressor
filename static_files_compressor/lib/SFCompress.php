@@ -317,7 +317,7 @@ class SFCompress {
 				|| strpos($tmpFile, WORKSPACE . '/' . $this->path . '/') !== 0) {
 					// it is not inside specified path
 					$this->debug('Local file must be within: workspace/' . $this->path . '. Ignoring: ' . $file);
-					continue;
+					return false;
 				}
 				$file = $tmpFile;
 				$this->appendFile('local', $file);
@@ -326,14 +326,18 @@ class SFCompress {
 				$fileGlob = glob($file);
 				$this->debug('Attempting glob: ' . $file);
 				if(is_array($fileGlob)) {
+					$containsErrors = false;
 					foreach($fileGlob as $file) {
 						//$this->appendFile('local', $file);
-						$this->addFile($file);
+						if(!$this->addFile($file)) {
+							$containsErrors = true;
+						}
 					}
+					return !$containsErrors;
 				}
 				else { // Glob failed, add file to list so that it will be refreshed
 					$this->debug('Glob failed.');
-					$this->appendFile('local', $file);
+					return $this->appendFile('local', $file);
 				}
 			}
 		}
@@ -342,11 +346,10 @@ class SFCompress {
 			$url = parse_url($file);
 			if(!in_array(strtolower($url['scheme']), array('http', 'https', 'ftp', 'sftp', 'ftps'))) {
 				$this->debug('Unsupported scheme: ' . $file);
-				continue;
+				return false;
 			}
-			$this->appendFile('remote', $file);
+			return $this->appendFile('remote', $file);
 		}
-		
 	}
 	
 	protected function appendFile($location, $file) {
