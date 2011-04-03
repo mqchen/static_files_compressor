@@ -19,7 +19,7 @@ class SFCompress {
 	protected $mode = 'plain'; // Either css or js
 	protected $compress = false; // minifies css and js
 	protected $cache = 'normal'; // Other options: refresh (force refresh this), flush (delete all cache files)
-	protected $cacheTimeout = 86400; // 24h. Only for remote cache (recommended to be very large unless they are often updated)
+	protected $cacheTimeout = 604800; // 7 days. Only for remote files (recommended to be very large unless they are often updated). Local files are sent with this expires schedule, but also considers ETag and IF_MODIFIED_SINCE.
 	protected $path = ''; // All local files must be relative to this directory. This is assumed to be within workspace.
 	protected $outputCompress = true; // attempt gzip compress is supported by browser
 	protected $files = array();
@@ -90,6 +90,7 @@ class SFCompress {
 		}
 		
 		// maybe refresh cache (call $this->refreshCache()) - create new cache file with refreshed contents
+		$contents = '';
 		if($refreshCache) {
 			$this->debug('Fetching and processing content.');
 			$contents = $this->processContents($this->getContents(), $this->mode, $this->compress);
@@ -125,9 +126,12 @@ class SFCompress {
 		$this->debug('Total time: ' . number_format($this->elapsedTime('main'), 3) . ' sec.');
 		
 		// Send output
+		$this->addHeader('Content-length', strlen($output));
 		$this->sendHeaders();
 		
 		echo $output;
+		// Send to client, no more output from now on
+		@flush();
 		
 		// Refresh cache
 		if(!self::$debug) { // Refresh cache after content has been sent, unless debug
@@ -144,25 +148,41 @@ class SFCompress {
 		if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
 			$date = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
 			if(!$date) {
+				$this->debug('Could not parse IF_MODIFIED_SINCE header from client.');
 				return false; // Date parsing failed
 			}
 			// If server«s cache has been modified after this date, client must refresh
 			if($this->getCacheLastModified() > $date) {
+				$this->debug('The server\'s cache is newer than the clients.');
 				return false; // Server«s cache is newer
 			}
 			// If cache is scheduled to expire soon (due to remote files), expire it
 			if($this->remoteFiles > 0 && $this->getCacheScheduledExpire() <= $date) {
+				$this->debug('Request includes remote files scheduled to expire after client\s last download.');
 				return false; // There were remote files requested, and servers cache was scheduled to expire before this request.
 			}
 			// Cache has not been modified since
+			$this->debug('Using IF_MODIFIED_SINCE header, and it is still valid.');
 			return true;
 		}
 		
 		// Etag
 		$this->contentsHash = md5($contents);
 		$clientEtag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : false;
+		if($clientEtag === false ||Êstrlen($clientEtag)) {
+			$this->debug('No ETag from client.');
+			return false;
+		}
+		
 		$clientEtag = str_replace(array('"',"'"), '', $clientEtag);
-		return $clientEtag === $this->contentsHash;
+		$r = $clientEtag === $this->contentsHash;
+		if($r) {
+			$this->debug('Using ETag, and it is still valid.');
+		}
+		else {
+			$this->debug('ETag is invalid: (client) ' . $clientEtag . ' !== ' . $this->contentsHash . ' (server)');
+		}
+		return $r;
 	}
 	
 	protected static function formatBytes($bytes, $pad = false) {
