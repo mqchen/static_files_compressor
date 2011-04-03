@@ -34,14 +34,15 @@ class SFCompress {
 	protected $cachePath = '/tmp'; // Reset later to CACHE.
 	protected $cachePrefix = 'sfc-';
 	protected $compressors = array(
-		// Javascript minifiers
+		/// Javascript minifiers
 		'js' => array('JSMin', 'minify'),
 		//'js' => array('JSMinPlus', 'minify'), // Note: JSMin is much faster, but compresses ca 2% less.
+		//'js' => array('YUICompressor', 'compressJS'),
 		
-		// CSS minifiers
-		//'css' => array('Minify_CSS_Compressor', 'process'),
+		/// CSS minifiers
 		'css' => array('CssMin', 'minify'),
-		//'css' => array(__CLASS__, 'pseudoCompress'),
+		//'css' => array('Minify_CSS_Compressor', 'process'),
+		//'css' => array('YUICompressor', 'compressCSS'),
 	);
 	protected $compression = array();
 	protected $timers = array();
@@ -231,7 +232,7 @@ class SFCompress {
 	public function debug($str) {
 		if(self::$debug) {
 			if($this->firephp === null) {
-				require_once dirname(__FILE__) . '/FirePHP.php';
+				require_once dirname(__FILE__) . '/FirePHP/FirePHP.php';
 				$this->firephp = FirePHP::init();
 			}
 			$tmp = debug_backtrace();
