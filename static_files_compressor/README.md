@@ -72,10 +72,29 @@ install the [FirePHP extension for Firebug][1]. You must also make the SFC reque
 the debug info.
 
 
+## Changelog
+
+**0.2 - 2011-04-03**  
+Added support for YUICompressor.
+
+**0.1.2.1 - 2011-04-01**  
+Various bug fixes.
+
+**0.1.2 - 2011-04-01**  
+Added support for glob-patterns.
+
+**0.1.1 - 2011-04-01**  
+Various bug fixes.
+
+**0.1 - 2011-04-01**  
+Initial release.
+
+
 ## License
 
 3rd party code each has their own license.
- 
+
+tl;dr It's okay to use it. 
 
 Copyright (c) 2011 Newzoo Ltd.
 
