@@ -74,19 +74,19 @@ the debug info.
 
 ## Changelog
 
-**0.2 - 2011-04-03**  
+**0.2** - 2011-04-03  
 Added support for YUICompressor.
 
-**0.1.2.1 - 2011-04-01**  
+**0.1.2.1** - 2011-04-01  
 Various bug fixes.
 
-**0.1.2 - 2011-04-01**  
+**0.1.2** - 2011-04-01  
 Added support for glob-patterns.
 
-**0.1.1 - 2011-04-01**  
+**0.1.1** - 2011-04-01  
 Various bug fixes.
 
-**0.1 - 2011-04-01**  
+**0.1** - 2011-04-01  
 Initial release.
 
 
