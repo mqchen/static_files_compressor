@@ -65,7 +65,7 @@ class extension_Static_Files_Compressor extends Extension {
 	
 	protected static $ruleBeginBlock = "\n\t### STATIC FILES COMPRESSOR BEGIN REWRITE\n\t";
 	protected static $ruleEndBlock = "\n\t### STATIC FILES COMPRESSOR END\n\n\t";
-	protected static $rule = "RewriteRule ^.*\/SFC\.([a-z]+)$ extensions/static_files_compressor/lib/compress.php?mode=$1&%{QUERY_STRING} [L]";
+	protected static $rule = 'RewriteRule ^.*\/SFC\.([a-z]+)$ extensions/static_files_compressor/lib/compress.php?mode=$1&%{QUERY_STRING} [L]';
 	protected static $beforeRule = '### CHECK FOR TRAILING SLASH';
 	
 	protected function addRewriteRules($htaccess) {
