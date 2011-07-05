@@ -302,10 +302,24 @@ class SFCompress {
 		$this->mode = isset($params['mode']) && ($params['mode'] === 'css' || $params['mode'] === 'js') ? $params['mode'] : 'txt';
 		
 		// Compress
-		$this->compress = isset($params['compress']);
+		// TODO: better fix, but quick fix for Opera which doesnt understand compressed stuff
+		//$browser = get_browser(null, true);
+		$isOpera = substr(strtolower($_SERVER['HTTP_USER_AGENT']),0, strlen('opera')) === 'opera';
+		if($isOpera) {
+			$this->compress = false;
+			$this->debug('User is using Opera, which currently doesnt work with compressed css and js.');
+		}
+		else {
+			$this->compress = isset($params['compress']);
+		}
 		
 		// Output compress
-		$this->outputCompress = isset($params['outputcompress']) ? !!$params['outputcompress'] : $this->outputCompress;
+		if($isOpera) {
+			$this->outputCompress = false;
+		}
+		else {
+			$this->outputCompress = isset($params['outputcompress']) ? !!$params['outputcompress'] : $this->outputCompress;
+		}
 		
 		// Cache timeout for remote files
 		if(isset($params['cachetimeout'])) {
