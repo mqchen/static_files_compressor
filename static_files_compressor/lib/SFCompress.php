@@ -152,10 +152,10 @@ class SFCompress {
 				$this->debug('Could not parse IF_MODIFIED_SINCE header from client.');
 				return false; // Date parsing failed
 			}
-			// If server«s cache has been modified after this date, client must refresh
+			// If serverï¿½s cache has been modified after this date, client must refresh
 			if($this->getCacheLastModified() > $date) {
 				$this->debug('The server\'s cache is newer than the clients.');
-				return false; // Server«s cache is newer
+				return false; // Serverï¿½s cache is newer
 			}
 			// If cache is scheduled to expire soon (due to remote files), expire it
 			if($this->remoteFiles > 0 && $this->getCacheScheduledExpire() <= $date) {
@@ -170,7 +170,7 @@ class SFCompress {
 		// Etag
 		$this->contentsHash = md5($contents);
 		$clientEtag = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : false;
-		if($clientEtag === false ||Êstrlen($clientEtag)) {
+		if($clientEtag === false ||ï¿½strlen($clientEtag)) {
 			$this->debug('No ETag from client.');
 			return false;
 		}
@@ -360,8 +360,8 @@ class SFCompress {
 			$tmpFile = realpath($file);
 			if($tmpFile !== false) {
 				// exists, validate that it is within workspace
-				if(strpos($tmpFile, WORKSPACE . '/') !== 0 // need to make sure there is no '../' in $path.
-				|| strpos($tmpFile, WORKSPACE . '/' . $this->path . '/') !== 0) {
+				if(strpos($tmpFile, realpath(WORKSPACE)) !== 0 // need to make sure there is no '../' in $path.
+				|| strpos($tmpFile, realpath(WORKSPACE . '/' . $this->path)) !== 0) {
 					// it is not inside specified path
 					$this->debug('Local file must be within: workspace/' . $this->path . '. Ignoring: ' . $file);
 					return false;
@@ -764,7 +764,7 @@ class SFCompress {
 		$compressor = $this->compressors[$mode];
 		if(!is_array($compressor) || !count($compressor) == 2) {
 			$this->debug($mode . ' compressor not specified.');
-			return $defaultCompressor; // Compressor didn«t load
+			return $defaultCompressor; // Compressor didnï¿½t load
 		}
 		
 		$class = $compressor[0];
@@ -777,16 +777,16 @@ class SFCompress {
 				include_once $file;
 			}
 			
-			// If class still doesnt exist, there«s something wrong
+			// If class still doesnt exist, thereï¿½s something wrong
 			if(!class_exists($class)) {
-				$this->debug($mode . ' compressor ('.$class.') doesn«t exist: ' . $file);
+				$this->debug($mode . ' compressor ('.$class.') doesnï¿½t exist: ' . $file);
 				return $defaultCompressor;
 			}
 		}
 		
 		// Check if method exists
 		if(!method_exists($class, $method)) {
-			$this->debug('Static method (' . $method . ') in class (' . $class . ') doesn«t exist.');
+			$this->debug('Static method (' . $method . ') in class (' . $class . ') doesnï¿½t exist.');
 			return $defaultCompressor;
 		}
 		
