@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension id="Static-Files-Compressor-for-Symphony-CMS" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+	<name>Static Files Compressor</name>
+	<description>An extension for automatically merging, minifying and compressing static files.</description>
+	<repo type="github">https://github.com/mqchen/Static-Files-Compressor-for-Symphony-CMS</repo>
+	<url type="discuss">http://symphony-cms.com/discuss/thread/65840/</url>
+	<types>
+		<type>Other</type>
+	</types>
+	<authors>
+		<author>
+			<name github="mqchen" symphony="mqchen">Moquan Chen</name>
+			<website>http://newzoo.no</website>
+		</author>
+	</authors>
+	<media>
+		<item type="image" url="http://symphonyextensions.com/mqchen/Static-Files-Compressor-for-Symphony-CMS/media/Static-Files-Compressor-for-Symphony-CMS.png">Static Files Compressor: An extension for automatically merging, minifying and compressing static files.</item>
+	</media>
+	<releases>
+		<release version="0.2" date="2011-03-31" min="2.1.2" />
+	</releases>
+</extension>
