@@ -19,12 +19,14 @@ Using gzip output compression, the size of responses are reduced dramatically to
 By explicitly specifying how the client should cache the response, it might improve the experience
 for that client and save server load.
 
-It also caches the request's response in a file on the server to save processing time.
+It also caches the request´s response in a file on the server to save processing time.
 
 
 ## How to install
 
-- Extract archive and move the directory `static_files_compressor` to your extensions directory.
+- Extract archive
+- Rename directory to `static_files_compressor`
+- Move the directory into your extensions directory
 - Enable it in Symphony
 
 
