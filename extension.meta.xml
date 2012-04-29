@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<extension id="Static-Files-Compressor-for-Symphony-CMS" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+<extension id="static_files_compressor" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
 	<name>Static Files Compressor</name>
 	<description>An extension for automatically merging, minifying and compressing static files.</description>
 	<repo type="github">https://github.com/mqchen/Static-Files-Compressor-for-Symphony-CMS</repo>

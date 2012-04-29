@@ -1,3 +1,6 @@
+## Note
+
+If anyone wants to take over maintenance of this extension, please get in touch!
 
 ## About
 
